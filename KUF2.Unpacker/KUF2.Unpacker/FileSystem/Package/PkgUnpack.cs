@@ -111,6 +111,8 @@ namespace KUF2.Unpacker
 
                     File.WriteAllBytes(m_FullPath, lpDstBuffer);
                 }
+
+                TPkgStream.Dispose();
             }
         }
     }
