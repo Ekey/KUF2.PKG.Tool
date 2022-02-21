@@ -62,10 +62,12 @@ namespace KUF2.Unpacker
                         dwReserved = PkgCipher.iDecryptInt32(dwReserved, m_Header),
                     };
 
-                    if (TEntry.dwCompressedSize != 0 || TEntry.dwDecompressedSize != 0)
-                    {
-                        m_EntryTable.Add(TEntry);
-                    }
+                    //if (TEntry.dwCompressedSize != 0 || TEntry.dwDecompressedSize != 0)
+                    //{
+                    //    m_EntryTable.Add(TEntry);
+                    //}
+
+                    m_EntryTable.Add(TEntry);
                 }
 
                 foreach (var m_Entry in m_EntryTable)
@@ -79,6 +81,7 @@ namespace KUF2.Unpacker
                     Int32 dwFileSize = 0;
                     Int32 dwTempPos = 0;
                     Byte[] lpDstBuffer = new Byte[m_Entry.dwDecompressedSize];
+
                     do
                     {
                         UInt32 dwChunkOffset = TPkgStream.ReadUInt32();
@@ -92,7 +95,15 @@ namespace KUF2.Unpacker
 
                         TPkgStream.Seek(dwChunkOffset, SeekOrigin.Begin);
 
-                        if (dwChunkCompressedSize == 0)
+                        if (dwChunkCompressedSize == 0 && dwChunkDecompressedSize == 0)
+                        {
+                            dwChunkDecompressedSize = 65536;
+                            var lpTemp = TPkgStream.ReadBytes(dwChunkDecompressedSize);
+                            Array.Copy(lpTemp, 0, lpDstBuffer, dwTempPos, lpTemp.Length);
+                            dwTempPos += lpTemp.Length;
+                            dwFileSize += lpTemp.Length;
+                        }
+                        else if (dwChunkCompressedSize == 0 && dwChunkDecompressedSize != 0)
                         {
                             var lpTemp = TPkgStream.ReadBytes(dwChunkDecompressedSize);
                             Array.Copy(lpTemp, 0, lpDstBuffer, dwTempPos, lpTemp.Length);
