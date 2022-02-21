@@ -62,7 +62,10 @@ namespace KUF2.Unpacker
                         dwReserved = PkgCipher.iDecryptInt32(dwReserved, m_Header),
                     };
 
-                    m_EntryTable.Add(TEntry);
+                    if (TEntry.dwCompressedSize != 0 || TEntry.dwDecompressedSize != 0)
+                    {
+                        m_EntryTable.Add(TEntry);
+                    }
                 }
 
                 foreach (var m_Entry in m_EntryTable)
