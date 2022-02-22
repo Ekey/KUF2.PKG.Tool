@@ -16,33 +16,28 @@ namespace KUF2.Unpacker
                 var lpHeader = TPkgStream.ReadBytes(16);
                 var m_Header = new PkgHeader();
 
-                using (var THeaderReader = new MemoryStream(lpHeader))
+                m_Header.dwMagic = TPkgStream.ReadUInt32();
+                m_Header.wMinorVersion = TPkgStream.ReadUInt16();
+                m_Header.wMajorVersion = TPkgStream.ReadUInt16();
+                m_Header.dwTotalFiles = TPkgStream.ReadInt64();
+
+                if (m_Header.dwMagic != 0x52414542)
                 {
-                    m_Header.dwMagic = THeaderReader.ReadUInt32();
-                    m_Header.wMinorVersion = THeaderReader.ReadUInt16();
-                    m_Header.wMajorVersion = THeaderReader.ReadUInt16();
-                    m_Header.dwTotalFiles = THeaderReader.ReadInt64();
-
-                    if (m_Header.dwMagic != 0x52414542)
-                    {
-                        throw new Exception("[ERROR]: Invalid magic of PKG file!");
-                    }
-
-                    if (m_Header.wMinorVersion != 1)
-                    {
-                        throw new Exception("[ERROR]: Invalid minor version of PKG file!");
-                    }
-
-                    if (m_Header.wMajorVersion != 2)
-                    {
-                        throw new Exception("[ERROR]: Invalid major version of PKG file!");
-                    }
-
-                    m_Header.dwTableSize = (m_Header.dwTotalFiles * 3) << 3;
-                    m_Header.dwSeed = (UInt32)TPkgStream.Length;
-
-                    THeaderReader.Dispose();
+                    throw new Exception("[ERROR]: Invalid magic of PKG file!");
                 }
+
+                if (m_Header.wMinorVersion != 1)
+                {
+                    throw new Exception("[ERROR]: Invalid minor version of PKG file!");
+                }
+
+                if (m_Header.wMajorVersion != 2)
+                {
+                    throw new Exception("[ERROR]: Invalid major version of PKG file!");
+                }
+
+                m_Header.dwTableSize = (m_Header.dwTotalFiles * 3) << 3;
+                m_Header.dwSeed = (UInt32)TPkgStream.Length;
 
                 m_EntryTable.Clear();
                 for (Int32 i = 0; i < m_Header.dwTotalFiles; i++)
